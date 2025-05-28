@@ -1,0 +1,48 @@
+﻿@using Microsoft.AspNet.Identity
+@using TimeManage.Models
+@{
+    string displayName = "";
+    if (Request.IsAuthenticated)
+    {
+        var userId = User.Identity.GetUserId();
+        using (var db = new ApplicationDbContext())
+        {
+            var user = db.Users.FirstOrDefault(u => u.Id == userId);
+            displayName = user?.DisplayName ?? User.Identity.GetUserName();
+        }
+    }
+}
+
+
+
+@if (Request.IsAuthenticated)
+{
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <ul class="navbar-nav navbar-right d-flex align-items-center">
+            <li>
+                @Html.ActionLink("Hi " + displayName + "!", "Index", "Manage", null, new { @class = "nav-link text-info" })
+            </li>
+            <li>
+                <div id="pomodoro-timer"
+                     style="font-weight:bold; color: green; padding-left: 10px; cursor:pointer; user-select:none;">
+                    Pomodoro: 25:00
+                </div>
+
+            </li>
+            <li>
+                <a class="nav-link" style="color: red;" href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+            </li>
+        </ul>
+    }
+}
+
+else
+{
+    <ul class="navbar-nav navbar-right">
+        <li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "nav-link" })</li>
+        <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })</li>
+    </ul>
+}

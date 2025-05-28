@@ -1,0 +1,38 @@
+﻿@model TimeManage.Models.ToDo
+
+@{
+    ViewBag.Title = "Create ToDo";
+}
+
+<h2>Create a new task</h2>
+
+@using (Html.BeginForm("Create", "ToDo", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            Enter task name
+            <br />
+             <div class="col-md-10">
+                @Html.EditorFor(m => m.Title)
+                @Html.ValidationMessageFor(m => m.Title)
+            </div>
+        </div>
+        <br />
+        @*<div class="form-group">
+             <div class="col-md-10">
+                Is your todo completed?
+                @Html.CheckBoxFor(m => m.IsComplete)
+            </div>
+        </div>*@
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+}
