@@ -1,4 +1,4 @@
-# TimeManage
+# TimeManage - manage your schedule, tasks & pomodoro timer
 
 ## Installation and Setup
 
