@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TimeManage.Models
 {
-    public class ToDo
+    public class Tasks
     {
         public int Id { get; set; }
 

@@ -6,7 +6,7 @@ using Microsoft.AspNet.Identity;
 namespace TimeManage.Controllers
 {
     [Authorize]
-    public class ToDoController : Controller
+    public class TasksController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
@@ -24,7 +24,7 @@ namespace TimeManage.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(ToDo todo)
+        public ActionResult Create(Tasks todo)
         {
             if (!ModelState.IsValid)
             {

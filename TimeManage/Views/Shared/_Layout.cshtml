@@ -19,7 +19,7 @@
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li>@Html.ActionLink("My TimeTable", "Index", "TimeTable", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("My Tasks", "Index", "ToDo", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("My Tasks", "Index", "Tasks", new { area = "" }, new { @class = "nav-link" })</li>
                     <li>@Html.ActionLink("Pomodoro", "Index", "Pomodoro", null, new { @class = "nav-link" })</li>
                 </ul>
                 @Html.Partial("_LoginPartial")
@@ -34,13 +34,125 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - Angel Stojmanovski</p>
+            <p>&copy; @DateTime.Now.Year - Angel Stojmanovski (Index: 236059)</p>
         </footer>
     </div>
+
+    <audio id="pomodoroSound" src="~/Content/sounds/ding.mp3" preload="auto"></audio>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+
+    <script src="~/Scripts/bootbox.js"></script>
+    <script>
+        let customTime = parseInt(localStorage.getItem("pomodoroCustomTime")) || 1500;
+        let timeLeft = parseInt(localStorage.getItem("pomodoroTimeLeft"));
+        if (isNaN(timeLeft)) {
+            timeLeft = customTime;
+        }
+
+        let isPaused = localStorage.getItem("pomodoroPaused") === "true";
+        let timerInterval;
+
+        function updatePomodoroDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const displayText = `⏰Pomodoro Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            const bigTimer = document.getElementById("pomodoro-display");
+            if (bigTimer) bigTimer.textContent = displayText;
+
+            const navTimer = document.getElementById("pomodoro-timer");
+            if (navTimer) navTimer.textContent = displayText;
+
+            const startPauseBtn = document.getElementById("startPauseBtn");
+            if (startPauseBtn) {
+                if (isPaused) {
+                    startPauseBtn.textContent = "Start timer";
+                    startPauseBtn.className = "btn btn-success";
+                    
+                } else {
+                    startPauseBtn.textContent = "Pause timer";
+                    startPauseBtn.className = "btn btn-warning";
+                }
+            }
+            if (isPaused) {
+                navTimer.className = "btn btn-success";
+            } else {
+                navTimer.className = "btn btn-warning";
+            }
+            
+        }
+
+        function tick() {
+            if (!isPaused && timeLeft > 0) {
+                timeLeft--;
+
+                if (timeLeft === 0) {
+                    isPaused = true;
+                    localStorage.setItem("pomodoroPaused", true);
+                    updatePomodoroDisplay();
+
+                    document.getElementById("pomodoroSound").play();
+
+                    bootbox.alert("Pomodoro complete! Take a break.");
+                    resetPomodoro();
+                }
+
+                localStorage.setItem("pomodoroTimeLeft", timeLeft);
+                updatePomodoroDisplay();
+            }
+        }
+
+        function togglePomodoro() {
+            isPaused = !isPaused;
+            localStorage.setItem("pomodoroPaused", isPaused);
+            updatePomodoroDisplay();
+        }
+
+        function resetPomodoro() {
+            timeLeft = customTime;
+            isPaused = true;
+            localStorage.setItem("pomodoroTimeLeft", timeLeft);
+            localStorage.setItem("pomodoroPaused", true);
+            updatePomodoroDisplay();
+        }
+
+        function setCustomTime() {
+            if (!isPaused) {
+                isPaused = true;
+                localStorage.setItem("pomodoroPaused", true);
+                updatePomodoroDisplay();
+            }
+
+            const minutes = parseInt(document.getElementById("minutesInput").value);
+            const seconds = parseInt(document.getElementById("secondsInput").value);
+
+            if (
+                isNaN(minutes) || minutes < 0 || minutes > 59 ||
+                isNaN(seconds) || seconds < 0 || seconds > 59
+            ) {
+                bootbox.alert("Please enter valid minutes (0-59) and seconds (0-59).");
+                return;
+            }
+
+            customTime = (minutes * 60) + seconds;
+            localStorage.setItem("pomodoroCustomTime", customTime);
+
+            timeLeft = customTime;
+            localStorage.setItem("pomodoroTimeLeft", timeLeft);
+
+            updatePomodoroDisplay();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updatePomodoroDisplay();
+            if (!timerInterval) {
+                timerInterval = setInterval(tick, 1000);
+            }
+        });
+    </script>
 
 </body>
 </html>

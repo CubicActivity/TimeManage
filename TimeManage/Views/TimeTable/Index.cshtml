@@ -1,7 +1,7 @@
 ﻿@model TimeManage.Models.TimeTable
 
 @{
-    ViewBag.Title = "Your Time Table";
+    ViewBag.Title = "Time Table";
     var renderedSlots = new HashSet<int>();
 }
 
@@ -12,9 +12,9 @@
     </div>
 }
 
-
 <div class="container">
     <h2>@ViewBag.Title</h2>
+    <p>Manage you weekly schedule with the time table below</p>
 
     <div class="row">
         <div class="col-md-8">
@@ -35,10 +35,7 @@
                             <td>@hour:00 - @(hour + 1):00</td>
                             @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
                             {
-                                var slot = Model.TimeSlots.FirstOrDefault(s =>
-                                    s.Day == day &&
-                                    s.StartTime.Hours == hour &&
-                                    !renderedSlots.Contains(s.Id));
+                                var slot = Model.TimeSlots.FirstOrDefault(s => s.Day == day && s.StartTime.Hours == hour && !renderedSlots.Contains(s.Id));
 
                                 if (slot != null)
                                 {
@@ -49,18 +46,11 @@
                                         <div class="d-flex flex-column justify-content-between h-100">
                                             <div>
                                                 <strong style="font-size: 1.1em;">@slot.Subject</strong><br />
-                                                <small class="text-white-50">@slot.Location</small>
+                                                <small class="text-black-50">@slot.Location</small>
                                             </div>
-                                            @using (Html.BeginForm("DeleteTimeSlot", "TimeTable", FormMethod.Post, new { @class = "mt-2" }))
-                                            {
-                                                @Html.AntiForgeryToken()
-                                                @Html.Hidden("id", slot.Id)
-                                                <button type="submit" class="btn btn-sm btn-light text-danger align-self-end" title="Delete slot">&times;</button>
-                                            }
+                                            <button type="button" class="btn btn-sm btn-light text-danger delete-btn" data-id="@slot.Id"> Delete</button>
                                         </div>
                                     </td>
-
-
                                 }
                                 else if (!Model.TimeSlots.Any(s =>
                                     s.Day == day &&
@@ -85,7 +75,7 @@
                     @using (Html.BeginForm("AddTimeSlot", "TimeTable"))
                     {
                         @Html.AntiForgeryToken()
-                        @Html.Hidden("timeTableId", Model.Id) <!-- Added hidden field here -->
+                        @Html.Hidden("timeTableId", Model.Id)
 
                         <div class="form-group">
                             <label>Weekday</label>
@@ -170,9 +160,45 @@
     {
         int hash = input.GetHashCode();
         Random rand = new Random(hash);
-        int r = (rand.Next(128) + 127); // 127–255
-        int g = (rand.Next(128) + 127);
-        int b = (rand.Next(128) + 127);
+
+        // so that its not too dark for black text
+        int r = (rand.Next(98) + 157);
+        int g = (rand.Next(98) + 157);
+        int b = (rand.Next(98) + 157);
         return $"rgb({r},{g},{b})";
     }
+}
+
+
+
+@section scripts{
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('.delete-btn').onclick(function () {
+                let button = $(this);
+                let id = button.data("id");
+                let form = $("#deleteForm_" + id);
+
+                bootbox.confirm("Are you sure you want to delete this slot?", function (succ) {
+                    if (succ) {
+                        $.ajax({
+                            url: '/TimeTable/DeleteTimeSlot/' + id,
+                            type: 'POST',
+                            success: function (response) {
+                                button.closest('td').remove();
+                                bootbox.alert("Task deleted successfully!");
+                            },
+                            error: function () {
+                                bootbox.alert("Error deleting task. Try again!");
+                            }
+                        });
+                    }
+                });
+            })
+
+        });
+    </script>
 }

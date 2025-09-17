@@ -1,0 +1,81 @@
+﻿@model IEnumerable<TimeManage.Models.Tasks>
+
+@{
+    ViewBag.Title = "Task List";
+}
+
+<h2>Current Tasks</h2>
+<p>Add new tasks to your list to keep track of your daily activities</p>
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+    <p style="margin: 0;">
+        @Html.ActionLink("Add New Task", "Create", null, new { @class = "btn btn-primary" })
+    </p>
+
+    @using (Html.BeginForm("DeleteAll", "Tasks", FormMethod.Post, new { onsubmit = "return confirm('Are you sure you want to delete all task?');", style = "margin: 0;" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <input type="submit" value="Delete All Tasks" class="btn btn-danger" />
+    }
+</div>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Completed</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@(item.IsComplete ? "Yes" : "No")</td>
+                <td>
+                    @using (Html.BeginForm("ToggleComplete", "Tasks", new { id = item.Id }, FormMethod.Post, new { @style = "display:inline" }))
+                    {
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            @(item.IsComplete ? "Mark Incomplete" : "Mark Complete")
+                        </button>
+                    }
+
+                        <button type="button" class="btn btn-sm btn-danger deletebtn" data-id="@item.Id">Delete</button>
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section scripts{
+        
+    <script>
+        $(document).ready(function () {
+            $('.deletebtn').click(function () {
+                var button = $(this);
+                var id = button.data('id'); // get task id
+
+                bootbox.confirm("Are you sure you want to delete this task?", function (result) {
+                    if (result) {
+                        $.ajax({
+                            url: '/Tasks/Delete/' + id,
+                            type: 'POST',
+                            success: function (response) {
+                                button.closest('tr').remove(); // remove the row
+                                bootbox.alert("Task deleted successfully!");
+                            },
+                            error: function () {
+                                bootbox.alert("Error deleting task. Try again!");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

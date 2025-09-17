@@ -10,7 +10,7 @@ namespace TimeManage.Models
     public class ApplicationUser : IdentityUser
     {
         public virtual ICollection<TimeTable> TimeTables { get; set; }
-        public virtual ICollection<ToDo> ToDos { get; set; }
+        public virtual ICollection<Tasks> ToDos { get; set; }
 
         public string DisplayName { get; set; }
 
@@ -30,7 +30,7 @@ namespace TimeManage.Models
         public DbSet<TimeTable> TimeTables { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
 
-        public DbSet<ToDo> ToDos { get; set; }
+        public DbSet<Tasks> ToDos { get; set; }
 
         public string DisplayName { get; set; }
 

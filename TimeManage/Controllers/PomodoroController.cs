@@ -9,7 +9,8 @@ namespace TimeManage.Controllers
     [Authorize]
     public class PomodoroController : Controller
     {
-        // GET: Pomodoro
+        // GET:
+        // 
         public ActionResult Index()
         {
             return View();

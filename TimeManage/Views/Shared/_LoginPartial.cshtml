@@ -17,27 +17,33 @@
 
 @if (Request.IsAuthenticated)
 {
-    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
     {
         @Html.AntiForgeryToken()
 
-        <ul class="navbar-nav navbar-right d-flex align-items-center">
-            <li>
-                @Html.ActionLink("Hi " + displayName + "!", "Index", "Manage", null, new { @class = "nav-link text-info" })
+        <ul class="navbar-nav ms-auto d-flex align-items-center gap-3">
+            <!-- User Greeting -->
+            <li class="nav-item">
+                @Html.ActionLink("Hi " + displayName + "!", "Index", "Manage", null, new { @class = "nav-link text-white fw-bold" })
             </li>
-            <li>
-                <div id="pomodoro-timer"
-                     style="font-weight:bold; color: green; padding-left: 10px; cursor:pointer; user-select:none;">
-                    Pomodoro: 25:00
-                </div>
 
+            <!-- Pomodoro Timer -->
+            <li class="nav-item">
+                <div id="pomodoro-timer" onclick="togglePomodoro()" title="Click to toggle the timer!"
+                     class="btn"
+                     style="cursor:pointer; user-select:none;">
+                    Pomodoro Time remaining:
+                </div>
             </li>
-            <li>
-                <a class="nav-link" style="color: red;" href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+
+            <!-- Log Off -->
+            <li class="nav-item">
+                <a class="nav-link text-danger fw-bold" href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
             </li>
         </ul>
     }
 }
+
 
 else
 {

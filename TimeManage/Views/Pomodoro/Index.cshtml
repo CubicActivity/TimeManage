@@ -3,9 +3,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>@ViewBag.Title</h2>
+@*<h2>@ViewBag.Title</h2>*@
 
 <h1><span id="pomodoro-display" style="color:green; font-weight:bold;">Pomodoro: 25:00</span></h1>
+<hr />
+<p>Set a custom time by clicking the blue Set Time button </p>
 
 <div class="mb-3">
     <label for="minutesInput" class="form-label">Minutes:</label>
@@ -16,114 +18,11 @@
 
     <button class="btn btn-primary ms-3" onclick="setCustomTime()">Set Time</button>
 </div>
-
+<hr />
 <div class="mt-3">
     <button id="startPauseBtn" class="btn btn-success" onclick="togglePomodoro()">Start</button>
     <button class="btn btn-danger" onclick="resetPomodoro()">Reset</button>
 </div>
+<hr />
+<p>Click Start timer to begin the timer, and reset the timer by clicking the Reset button. <br /> (Alternatively press the button at the top right to start/pause)</p>
 
-<audio id="pomodoroSound" src="~/Content/sounds/ding.mp3" preload="auto"></audio>
-
-<script>
-    let customTime = parseInt(localStorage.getItem("pomodoroCustomTime")) || 1500;
-    let timeLeft = parseInt(localStorage.getItem("pomodoroTimeLeft"));
-    if (isNaN(timeLeft)) {
-        timeLeft = customTime;
-    }
-
-    let isPaused = localStorage.getItem("pomodoroPaused") === "true";
-    let timerInterval;
-
-    function updatePomodoroDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        const displayText = `Pomodoro: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-        const bigTimerEl = document.getElementById("pomodoro-display");
-        if (bigTimerEl) bigTimerEl.textContent = displayText;
-
-        const navTimerEl = document.getElementById("pomodoro-timer");
-        if (navTimerEl) navTimerEl.textContent = displayText;
-
-        const startPauseBtn = document.getElementById("startPauseBtn");
-        if (startPauseBtn) {
-            if (isPaused) {
-                startPauseBtn.textContent = "Start timer";
-                startPauseBtn.className = "btn btn-success";
-            } else {
-                startPauseBtn.textContent = "Pause timer";
-                startPauseBtn.className = "btn btn-warning";
-            }
-        }
-    }
-
-    function tick() {
-        if (!isPaused && timeLeft > 0) {
-            timeLeft--;
-
-            if (timeLeft === 0) {
-                isPaused = true;
-                localStorage.setItem("pomodoroPaused", true);
-                updatePomodoroDisplay();
-
-                document.getElementById("pomodoroSound").play();
-
-                alert("Pomodoro complete! Take a break.");
-                resetPomodoro();
-            }
-
-            localStorage.setItem("pomodoroTimeLeft", timeLeft);
-            updatePomodoroDisplay();
-        }
-    }
-
-    function togglePomodoro() {
-        isPaused = !isPaused;
-        localStorage.setItem("pomodoroPaused", isPaused);
-        updatePomodoroDisplay();
-    }
-
-    function resetPomodoro() {
-        timeLeft = customTime;
-        isPaused = true;
-        localStorage.setItem("pomodoroTimeLeft", timeLeft);
-        localStorage.setItem("pomodoroPaused", true);
-        updatePomodoroDisplay();
-    }
-
-    function setCustomTime() {
-        if (!isPaused) {
-            isPaused = true;
-            localStorage.setItem("pomodoroPaused", true);
-            updatePomodoroDisplay();
-        }
-
-        const minutes = parseInt(document.getElementById("minutesInput").value);
-        const seconds = parseInt(document.getElementById("secondsInput").value);
-
-        if (
-            isNaN(minutes) || minutes < 0 || minutes > 59 ||
-            isNaN(seconds) || seconds < 0 || seconds > 59
-        ) {
-            alert("Please enter valid minutes (0-59) and seconds (0-59).");
-            return;
-        }
-
-        customTime = (minutes * 60) + seconds;
-        localStorage.setItem("pomodoroCustomTime", customTime);
-
-        timeLeft = customTime;
-        localStorage.setItem("pomodoroTimeLeft", timeLeft);
-
-        updatePomodoroDisplay();
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        updatePomodoroDisplay();
-        if (!timerInterval) {
-            timerInterval = setInterval(tick, 1000);
-        }
-    });
-</script>
-
-<p>Click the buttons to Start/pause or reset the timer. Set a custom time and click "Set Time" before starting.</p>

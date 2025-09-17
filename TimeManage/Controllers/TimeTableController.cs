@@ -42,7 +42,7 @@ namespace TimeManage.Controllers
             }
 
             var conflicts = db.TimeSlots.Any(slot =>
-                slot.TimeTableId == timeTableId &&  // also check by timetable
+                slot.TimeTableId == timeTableId &&
                 slot.Day == dayEnum &&
                 !(slot.EndTime <= start || slot.StartTime >= end)
             );
@@ -55,7 +55,7 @@ namespace TimeManage.Controllers
 
             var newSlot = new TimeSlot
             {
-                TimeTableId = timeTableId,   // Set the foreign key here
+                TimeTableId = timeTableId,
                 Day = dayEnum,
                 StartTime = start,
                 EndTime = end,
@@ -69,10 +69,7 @@ namespace TimeManage.Controllers
             return RedirectToAction("Index");
         }
 
-
-
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult DeleteTimeSlot(int id)
         {
             var slot = db.TimeSlots.Find(id);
@@ -81,17 +78,14 @@ namespace TimeManage.Controllers
                 db.TimeSlots.Remove(slot);
                 db.SaveChanges();
             }
-            return RedirectToAction("Index"); // Or wherever you want to go after deleting
+            return RedirectToAction("Index");
         }
-
-
 
         protected override void Dispose(bool disposing)
         {
             if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
-
 
     }
 }

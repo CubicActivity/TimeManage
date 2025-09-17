@@ -279,7 +279,7 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PomodoroController.cs" />
     <Compile Include="Controllers\TimeTableController.cs" />
-    <Compile Include="Controllers\ToDoController.cs" />
+    <Compile Include="Controllers\TasksController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -299,13 +299,17 @@
     <Compile Include="Migrations\202505281151419_AddDisplayNameToUser.Designer.cs">
       <DependentUpon>202505281151419_AddDisplayNameToUser.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509171128452_Rename Todo to Tasks.cs" />
+    <Compile Include="Migrations\202509171128452_Rename Todo to Tasks.Designer.cs">
+      <DependentUpon>202509171128452_Rename Todo to Tasks.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\TimeSlot.cs" />
     <Compile Include="Models\TimeTable.cs" />
-    <Compile Include="Models\ToDo.cs" />
+    <Compile Include="Models\Tasks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -330,6 +334,8 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Scripts\bootbox.js" />
+    <Content Include="Scripts\bootbox.min.js" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -380,8 +386,8 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\TimeTable\Index.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\ToDo\Index.cshtml" />
-    <Content Include="Views\ToDo\Create.cshtml" />
+    <Content Include="Views\Tasks\Index.cshtml" />
+    <Content Include="Views\Tasks\Create.cshtml" />
     <Content Include="Views\Pomodoro\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -400,6 +406,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202505281151419_AddDisplayNameToUser.resx">
       <DependentUpon>202505281151419_AddDisplayNameToUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509171128452_Rename Todo to Tasks.resx">
+      <DependentUpon>202509171128452_Rename Todo to Tasks.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
