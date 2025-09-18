@@ -30,7 +30,7 @@ namespace TimeManage.Models
         public DbSet<TimeTable> TimeTables { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
 
-        public DbSet<Tasks> ToDos { get; set; }
+        public DbSet<Tasks> Tasks { get; set; }
 
         public string DisplayName { get; set; }
 
@@ -61,5 +61,7 @@ namespace TimeManage.Models
         {
             return new ApplicationDbContext();
         }
+
+        public System.Data.Entity.DbSet<TimeManage.Models.Goal> Goals { get; set; }
     }
 }

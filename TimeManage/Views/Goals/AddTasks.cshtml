@@ -1,0 +1,21 @@
+﻿@model TimeManage.ViewModels.GoalTaskViewModel
+
+@{
+    ViewBag.Title = "AddTasks";
+}
+
+<h2>Add Task to your goal @Model.goal.GoalName</h2>
+
+@using (Html.BeginForm("AddTaskToGoal", "Goals", FormMethod.Get))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @Html.Hidden("GoalId", Model.goal.GoalId)
+    @Html.DropDownList("taskId",
+        new SelectList(Model.Tasks, "Id", "Title"), "Select a task");
+    <br /><br />
+    <button type="submit" class="btn btn-primary">Add Task</button>
+</div>
+}

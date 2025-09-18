@@ -13,7 +13,7 @@ namespace TimeManage.Controllers
         public ActionResult Index()
         {
             string userId = User.Identity.GetUserId();
-            var todos = db.ToDos.Where(t => t.UserId == userId).ToList();
+            var todos = db.Tasks.Where(t => t.UserId == userId).ToList();
             return View(todos);
         }
 
@@ -24,7 +24,7 @@ namespace TimeManage.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Tasks todo)
+        public ActionResult Create(Tasks task)
         {
             if (!ModelState.IsValid)
             {
@@ -35,20 +35,20 @@ namespace TimeManage.Controllers
             }
             else
             {
-                todo.UserId = User.Identity.GetUserId();
-                db.ToDos.Add(todo);
+                task.UserId = User.Identity.GetUserId();
+                db.Tasks.Add(task);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            return View(todo);
+            return View(task);
         }
 
         [HttpPost]
         [Authorize]
         public ActionResult ToggleComplete(int id)
         {
-            var todo = db.ToDos.Find(id);
+            var todo = db.Tasks.Find(id);
             if (todo == null || todo.UserId != User.Identity.GetUserId())
                 return HttpNotFound();
 
@@ -62,11 +62,11 @@ namespace TimeManage.Controllers
         [Authorize]
         public ActionResult Delete(int id)
         {
-            var todo = db.ToDos.Find(id);
+            var todo = db.Tasks.Find(id);
             if (todo == null || todo.UserId != User.Identity.GetUserId())
                 return HttpNotFound();
 
-            db.ToDos.Remove(todo);
+            db.Tasks.Remove(todo);
             db.SaveChanges();
 
             return RedirectToAction("Index");
@@ -77,8 +77,8 @@ namespace TimeManage.Controllers
         public ActionResult DeleteAll()
         {
             var userId = User.Identity.GetUserId();
-            var allTasks = db.ToDos.Where(t => t.UserId == userId);
-            db.ToDos.RemoveRange(allTasks);
+            var allTasks = db.Tasks.Where(t => t.UserId == userId);
+            db.Tasks.RemoveRange(allTasks);
             db.SaveChanges();
             return RedirectToAction("Index");
         }

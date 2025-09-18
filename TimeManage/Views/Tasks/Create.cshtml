@@ -16,18 +16,23 @@
         <div class="form-group">
             Enter task name
             <br />
-             <div class="col-md-10">
+            <div class="col-md-10">
                 @Html.EditorFor(m => m.Title)
                 @Html.ValidationMessageFor(m => m.Title)
             </div>
-        </div>
-        <br />
+            Enter task description
+            <div class="col-md-10">
+                @Html.EditorFor(m => m.Description)
+                @Html.ValidationMessageFor(m => m.Description)
+            </div>
+            </div>
+            <br />
 
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
             </div>
         </div>
-    </div>
 }
