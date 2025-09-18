@@ -2,7 +2,7 @@
 **Изработил: Ангел Стојмановски (Индекс: 236059)**
 
 ## TimeManage
-Manage your weekly schedules, daily tasks, and Pomodoro timer to boost productivity.
+Manage your weekly schedules, long term goals and tasks, including a Pomodoro timer to boost productivity.
 
 <img width="1864" height="890" alt="image" src="https://github.com/user-attachments/assets/8c3ef707-8113-4c51-a4f7-01dd955a85af" />
 
