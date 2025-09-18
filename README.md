@@ -11,7 +11,7 @@ Manage your weekly schedules, daily tasks, and Pomodoro timer to boost productiv
    git clone https://github.com/CubicActivity/TimeManage.git
    cd TimeManage
 
-2. **Start the project:**
+2. **Open the project:**
 
     Open the solution file in Visual Studio 2019 (or later) with .NET Framework 4.7.2 support.
 
