@@ -16,11 +16,12 @@ Manage your weekly schedules, daily tasks, and Pomodoro timer to boost productiv
     Open the solution file in Visual Studio 2019 (or later) with .NET Framework 4.7.2 support.
 
 3. **Restore NuGet packages:**
+   
     Restore the required NuGet packages either via Visual Studio (Tools > NuGet Package Manager > Manage NuGet Packages for Solution) or by running the following command in the Package Manager Console:
     ```
     Update-Package -reinstall
     ```
-4. **Run the following command in the Package Manager Console to apply migrations and create the database schema:**
+5. **Run the following command in the Package Manager Console to apply migrations and create the database schema:**
 
     ```
     Update-Database
