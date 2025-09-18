@@ -24,7 +24,7 @@ Manage your weekly schedules, daily tasks, and Pomodoro timer to boost productiv
 5. **Run the following command in the Package Manager Console to apply migrations and create the database schema:**
 
     ```
-    Add-Migration test
+    Add-Migration start
     Update-Database
     ```
 
