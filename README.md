@@ -1,5 +1,8 @@
-# TimeManage - manage your schedule, tasks & pomodoro timer
+# Интернет Технологии – Проект за повисока оценка
+**Изработил: Ангел Стојмановски (Индекс: 236059)**
 
+## TimeManage
+Manage your weekly schedules, daily tasks, and Pomodoro timer to boost productivity.
 ## Installation and Setup
 
 1. **Clone the repository:**
@@ -8,12 +11,11 @@
    git clone https://github.com/CubicActivity/TimeManage.git
    cd TimeManage
 
-2. **Open the solution:**
+2. **Start the project:**
 
     Open the solution file in Visual Studio 2019 (or later) with .NET Framework 4.7.2 support.
 
 3. **Restore NuGet packages:**
-
     Restore the required NuGet packages either via Visual Studio (Tools > NuGet Package Manager > Manage NuGet Packages for Solution) or by running the following command in the Package Manager Console:
     ```
     Update-Package -reinstall
@@ -27,13 +29,17 @@
 
 ## Features
 
-- **Timetable Management:** Enables users to create, modify, and visualize daily and weekly schedules to optimize time allocation.  
-- **Task Management (To-Do Lists):** Facilitates organization and prioritization of tasks through customizable to-do lists.  
-- **Pomodoro Timer:** Incorporates Pomodoro timer to improve focus and productivity by dividing work into timed 25 minute intervals.
+### Features
 
-- Intuitive user interface implemented via ASP.NET MVC for seamless navigation.  
-- Robust data handling using Entity Framework Core Code First approach.  
-- Automatic database creation and migration management to streamline deployment.
+- **Timetable Management:** Easily create, edit, and view your daily and weekly schedules to make the most of your time.
+
+- **Task Management:** Keep track of completed and pending tasks effortlessly.
+
+- **Pomodoro Timer:** Boost productivity with timed work sessions. Use the default 25-minute Pomodoro or customize the duration to suit your workflow.
+
+- **User-Friendly Interface:** Navigate your weekly schedule and tasks effortlessly with a clean, minimalistic design.
+
+- **Automatic Database Setup:** The database is created and updated automatically, making deployment straightforward and hassle-free.
  
 
 ## Prerequisites
@@ -41,4 +47,8 @@
 - Windows operating system  
 - Visual Studio 2019 (or later) with .NET Framework 4.7.2 support  
 - SQL Server Express LocalDB (typically included with Visual Studio installations)  
+
+
+
+
  
