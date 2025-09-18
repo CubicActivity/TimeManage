@@ -46,115 +46,126 @@
 
     <script src="~/Scripts/bootbox.js"></script>
     <script>
-        let customTime = parseInt(localStorage.getItem("pomodoroCustomTime")) || 1500;
-        let timeLeft = parseInt(localStorage.getItem("pomodoroTimeLeft"));
-        if (isNaN(timeLeft)) {
-            timeLeft = customTime;
-        }
-
-        let isPaused = localStorage.getItem("pomodoroPaused") === "true";
-        let timerInterval;
-
-        function updatePomodoroDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            const displayText = `⏰Pomodoro Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-            const bigTimer = document.getElementById("pomodoro-display");
-            if (bigTimer) bigTimer.textContent = displayText;
-
-            const navTimer = document.getElementById("pomodoro-timer");
-            if (navTimer) navTimer.textContent = displayText;
-
-            const startPauseBtn = document.getElementById("startPauseBtn");
-            if (startPauseBtn) {
-                if (isPaused) {
-                    startPauseBtn.textContent = "Start timer";
-                    startPauseBtn.className = "btn btn-success";
-                    
-                } else {
-                    startPauseBtn.textContent = "Pause timer";
-                    startPauseBtn.className = "btn btn-warning";
-                }
-            }
-            if (isPaused) {
-                navTimer.className = "btn btn-success";
-            } else {
-                navTimer.className = "btn btn-warning";
-            }
-            
-        }
-
-        function tick() {
-            if (!isPaused && timeLeft > 0) {
-                timeLeft--;
-
-                if (timeLeft === 0) {
-                    isPaused = true;
-                    localStorage.setItem("pomodoroPaused", true);
-                    updatePomodoroDisplay();
-
-                    document.getElementById("pomodoroSound").play();
-
-                    bootbox.alert("Pomodoro complete! Take a break.");
-                    resetPomodoro();
-                }
-
-                localStorage.setItem("pomodoroTimeLeft", timeLeft);
-                updatePomodoroDisplay();
-            }
-        }
-
-        function togglePomodoro() {
-            isPaused = !isPaused;
-            localStorage.setItem("pomodoroPaused", isPaused);
-            updatePomodoroDisplay();
-        }
-
-        function resetPomodoro() {
-            timeLeft = customTime;
-            isPaused = true;
-            localStorage.setItem("pomodoroTimeLeft", timeLeft);
-            localStorage.setItem("pomodoroPaused", true);
-            updatePomodoroDisplay();
-        }
-
-        function setCustomTime() {
-            if (!isPaused) {
-                isPaused = true;
-                localStorage.setItem("pomodoroPaused", true);
-                updatePomodoroDisplay();
-            }
-
-            const minutes = parseInt(document.getElementById("minutesInput").value);
-            const seconds = parseInt(document.getElementById("secondsInput").value);
-
-            if (
-                isNaN(minutes) || minutes < 0 || minutes > 59 ||
-                isNaN(seconds) || seconds < 0 || seconds > 59
-            ) {
-                bootbox.alert("Please enter valid minutes (0-59) and seconds (0-59).");
-                return;
-            }
-
-            customTime = (minutes * 60) + seconds;
-            localStorage.setItem("pomodoroCustomTime", customTime);
-
-            timeLeft = customTime;
-            localStorage.setItem("pomodoroTimeLeft", timeLeft);
-
-            updatePomodoroDisplay();
-        }
-
         document.addEventListener("DOMContentLoaded", () => {
-            updatePomodoroDisplay();
-            if (!timerInterval) {
-                timerInterval = setInterval(tick, 1000);
+            let usr = '@User.Identity.Name';
+            usr = usr.slice(0, usr.lastIndexOf('@@'));
+
+            let customTime = parseInt(localStorage.getItem(usr + "pomodoroCustomTime")) || 1500;
+            let startTime = parseInt(localStorage.getItem(usr + "pomodoroStartTime"));
+            let pausedTimeLeft = parseInt(localStorage.getItem(usr + "pomodoroTimeLeft"));
+            if (isNaN(pausedTimeLeft)) pausedTimeLeft = customTime;
+
+            let isPaused = localStorage.getItem(usr + "pomodoroPaused") === "true";
+            let timerInterval;
+
+            function getTimeLeft() {
+                if (isPaused) return pausedTimeLeft ?? customTime;
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = customTime - elapsed;
+                if (remaining <= 0) {
+                    completePomodoro();
+                    return 0;
+                }
+                return remaining;
             }
+
+            function updatePomodoroDisplay() {
+                const minutes = Math.floor(getTimeLeft() / 60);
+                const seconds = getTimeLeft() % 60;
+                const displayText = `⏰Pomodoro Time remaining: ${minutes}:${seconds.toString().padStart(2,'0')}`;
+
+                const bigTimer = document.getElementById("pomodoro-display");
+                if (bigTimer) bigTimer.textContent = displayText;
+
+                const navTimer = document.getElementById("pomodoro-timer");
+                if (navTimer) navTimer.textContent = displayText;
+
+                const startPauseBtn = document.getElementById("startPauseBtn");
+                if (startPauseBtn) {
+                    startPauseBtn.textContent = isPaused ? "Start timer" : "Pause timer";
+                    startPauseBtn.className = isPaused ? "btn btn-success" : "btn btn-warning";
+                }
+
+                if (navTimer) navTimer.className = isPaused ? "btn btn-success" : "btn btn-warning";
+            }
+
+            function tick() {
+                if (!isPaused) updatePomodoroDisplay();
+            }
+
+            function togglePomodoro() {
+                if (isPaused) {
+                    startTime = Date.now() - ((customTime - pausedTimeLeft) * 1000 || 0);
+                    localStorage.setItem(usr + "pomodoroStartTime", startTime);
+                } else {
+                    pausedTimeLeft = getTimeLeft();
+                    localStorage.setItem(usr + "pomodoroTimeLeft", pausedTimeLeft);
+                }
+                isPaused = !isPaused;
+                localStorage.setItem(usr + "pomodoroPaused", isPaused);
+                updatePomodoroDisplay();
+            }
+
+            function completePomodoro() {
+                isPaused = true;
+                localStorage.setItem(usr + "pomodoroPaused", true);
+                localStorage.setItem(usr + "pomodoroTimeLeft", 0);
+                updatePomodoroDisplay();
+
+                const sound = document.getElementById("pomodoroSound");
+                if (sound) {
+                    sound.currentTime = 0;
+                    sound.play().catch(() => { });
+                }
+
+                bootbox.alert("Pomodoro complete! Take a break.");
+                resetPomodoro();
+            }
+
+
+            function resetPomodoro() {
+                pausedTimeLeft = customTime;
+                isPaused = true;
+                localStorage.setItem(usr + "pomodoroTimeLeft", pausedTimeLeft);
+                localStorage.setItem(usr + "pomodoroPaused", true);
+                localStorage.removeItem(usr + "pomodoroStartTime");
+                updatePomodoroDisplay();
+            }
+
+            function setCustomTime() {
+                if (!isPaused) togglePomodoro();
+
+                const minutes = parseInt(document.getElementById("minutesInput").value);
+                const seconds = parseInt(document.getElementById("secondsInput").value);
+                if (isNaN(minutes) || minutes < 0 || minutes > 59 || isNaN(seconds) || seconds < 0 || seconds > 59) {
+                    bootbox.alert("Please enter valid minutes (0-59) and seconds (0-59).");
+                    return;
+                }
+
+                customTime = (minutes * 60) + seconds;
+                localStorage.setItem(usr + "pomodoroCustomTime", customTime);
+                resetPomodoro();
+            }
+
+            const soundUnlock = () => {
+                const sound = document.getElementById("pomodoroSound");
+                if (sound) {
+                    sound.play().then(() => sound.pause()).catch(() => {});
+                }
+                document.removeEventListener("click", soundUnlock);
+            };
+            document.addEventListener("click", soundUnlock);
+
+            updatePomodoroDisplay();
+            if (!timerInterval) timerInterval = setInterval(tick, 1000);
+
+            window.togglePomodoro = togglePomodoro;
+            window.resetPomodoro = resetPomodoro;
+            window.setCustomTime = setCustomTime;
         });
     </script>
 
+
+
 </body>
 </html>
-
-
