@@ -1,0 +1,215 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+        <div class="container">
+            @Html.ActionLink("TimeManage", "Index", "TimeTable", new { area = "" }, new { @class = "navbar-brand" })
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1">
+                    <li>@Html.ActionLink("My TimeTable", "Index", "TimeTable", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("My Goals", "Index", "Goals", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("My Tasks", "Index", "Tasks", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("Pomodoro", "Index", "PomodoroTimers", null, new { @class = "nav-link" })</li>
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </nav>
+
+    <style>
+        #indexFooter {
+            zoom: 0.9;
+        }
+    </style>
+
+    <div class="container body-content" id="indexFooter">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Angel Stojmanovski (Index: 236059)</p>
+        </footer>
+    </div>
+
+    <audio id="pomodoroSound" src="~/Content/sounds/ding.mp3" preload="auto"></audio>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    <script src="~/Scripts/bootbox.js"></script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        let pomodoroInterval;
+        let isPomodoroRunning = false;
+
+        function loadTimerFromServer() {
+            $.get('@Url.Action("GetTimerStatus", "PomodoroTimers")', function(data) {
+                updatePomodoroDisplay(data.Minutes, data.Seconds);
+                isPomodoroRunning = data.IsRunning;
+                updateButtonState();
+
+                if (isPomodoroRunning) {
+                    startServerPolling();
+                }
+            });
+        }
+
+        function updatePomodoroDisplay(minutes, seconds) {
+            const displayTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            const bigTimer = document.getElementById("pomodoro-display");
+            if (bigTimer) bigTimer.textContent = `Pomodoro: ${displayTime}`;
+
+            const layoutTimer = document.getElementById("layout-pomodoro-timer");
+            if (layoutTimer) layoutTimer.textContent = displayTime;
+        }
+
+        function updateButtonState() {
+            const navTimer = document.getElementById("pomodoro-timer");
+            if (navTimer) {
+                if (isPomodoroRunning) {
+                    navTimer.className = "btn btn-warning";
+                    navTimer.style.color = "black";
+                } else {
+                    navTimer.className = "btn btn-success";
+                    navTimer.style.color = "white";
+                }
+            }
+
+            const startPauseBtn = document.getElementById("startPauseBtn");
+            if (startPauseBtn) {
+                startPauseBtn.textContent = isPomodoroRunning ? "Pause timer" : "Start timer";
+                startPauseBtn.className = isPomodoroRunning ? "btn btn-warning" : "btn btn-success";
+            }
+        }
+
+        function togglePomodoro() {
+            $.post('@Url.Action("StartPause", "PomodoroTimers")', function(data) {
+                updatePomodoroState(data);
+            });
+        }
+
+        function updatePomodoroState(data) {
+            isPomodoroRunning = data.IsRunning;
+            updatePomodoroDisplay(data.Minutes, data.Seconds);
+            updateButtonState();
+
+            if (isPomodoroRunning) {
+                startServerPolling();
+            } else {
+                stopServerPolling();
+            }
+
+            if (data.Completed) {
+                playCompletionSound();
+                showCompletionAlert();
+            }
+        }
+
+        function resetPomodoro() {
+            $.post('@Url.Action("Reset", "PomodoroTimers")', function(data) {
+                updatePomodoroState(data);
+
+                const minutesInput = document.getElementById("minutesInput");
+                const secondsInput = document.getElementById("secondsInput");
+                if (minutesInput) minutesInput.value = data.Minutes;
+                if (secondsInput) secondsInput.value = data.Seconds;
+            });
+        }
+
+        function setCustomTime() {
+            const minutes = parseInt(document.getElementById("minutesInput").value) || 0;
+            const seconds = parseInt(document.getElementById("secondsInput").value) || 0;
+
+            if (minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) {
+                bootbox.alert("Please enter valid minutes (0-59) and seconds (0-59).");
+                return;
+            }
+
+            $.post('@Url.Action("SetCustomTime", "PomodoroTimers")', {
+                minutes: minutes,
+                seconds: seconds
+            }, function(data) {
+                updatePomodoroState(data);
+            });
+        }
+
+        function startServerPolling() {
+            stopServerPolling();
+            pomodoroInterval = setInterval(function() {
+                $.get('@Url.Action("GetTimerStatus", "PomodoroTimers")', function(data) {
+                updatePomodoroDisplay(data.Minutes, data.Seconds);
+
+                if (!data.IsRunning && isPomodoroRunning) {
+                    isPomodoroRunning = false;
+                    updateButtonState();
+                    stopServerPolling();
+
+                    if (data.Completed) {
+                        playCompletionSound();
+                        showCompletionAlert();
+                    }
+                }
+            });
+            }, 1000);
+        }
+
+        function stopServerPolling() {
+            if (pomodoroInterval) {
+                clearInterval(pomodoroInterval);
+                pomodoroInterval = null;
+            }
+        }
+
+        function playCompletionSound() {
+            const sound = document.getElementById("pomodoroSound");
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(() => { });
+            }
+        }
+
+        function showCompletionAlert() {
+            bootbox.alert("Pomodoro complete! Take a break.");
+        }
+
+        function updateTimerFromServer() {
+            $.get('@Url.Action("GetTimerStatus", "PomodoroTimers")', function(data) {
+            updatePomodoroDisplay(data.Minutes, data.Seconds);
+
+        if (!data.IsRunning && isPomodoroRunning) {
+            isPomodoroRunning = false;
+            updateButtonState();
+            stopServerPolling();
+
+            if (data.Completed) {
+                playCompletionSound();
+                showCompletionAlert();
+            }
+        }
+    }).fail(function() {
+        console.error('Error updating timer');
+        stopServerPolling();
+    });
+}
+        window.togglePomodoro = togglePomodoro;
+        window.resetPomodoro = resetPomodoro;
+        window.setCustomTime = setCustomTime;
+
+        loadTimerFromServer();
+    });
+    </script>
+</body>
+</html>

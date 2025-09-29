@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "Pomodoro";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1><span id="pomodoro-display" style="color:black; font-weight:bold;">Pomodoro: 25:00</span></h1>
+<hr />
+<h4>Put custom time by clicking the Set Time button </h4>
+<br />
+
+<div class="mb-3">
+    <label for="minutesInput" class="form-label">Minutes:</label>
+    <input type="number" id="minutesInput" min="0" max="59" value="25" style="width: 60px;" />
+
+    <label for="secondsInput" class="form-label ms-3">Seconds:</label>
+    <input type="number" id="secondsInput" min="0" max="59" value="0" style="width: 60px;" />
+
+    <button class="btn btn-primary ms-3" onclick="setCustomTime()">Set Time</button>
+</div>
+<hr />
+<div class="mt-3">
+    <button id="startPauseBtn" class="btn btn-success" onclick="togglePomodoro()">Start timer</button>
+    <button class="btn btn-danger" onclick="resetPomodoro()">Reset</button>
+</div>
+<br />
+<p>Click "Start timer" to begin the timer, and reset the timer by clicking "Reset". <br /> (Alternatively press the clock at the top right to start/pause the timer)</p>
+
+@section Scripts {
+    <script>
+    </script>
+}

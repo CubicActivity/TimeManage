@@ -1,0 +1,42 @@
+﻿@model TimeManage.Models.TimeSlot
+
+@{
+    ViewBag.Title = "Time Slot Details";
+}
+
+<h2>Activity Details</h2>
+
+<div >
+    <dl class="row">
+        <dt class="col-sm-2">Subject</dt>
+        <dd class="col-sm-10">@Model.Subject</dd>
+
+        <dt class="col-sm-2">Day</dt>
+        <dd class="col-sm-10">@Model.Day</dd>
+
+        <dt class="col-sm-2">Start Time</dt>
+        <dd class="col-sm-10">@Model.StartTime</dd>
+
+        <dt class="col-sm-2">End Time</dt>
+        <dd class="col-sm-10">@Model.EndTime</dd>
+
+
+        <dt class="col-sm-2">Location</dt>
+        <dd class="col-sm-10">@Model.Location</dd>
+
+        <dt class="col-sm-2">Background Color</dt>
+        <dd class="col-sm-10">
+            <div style="width:50px; height:25px; background-color:@Model.Color; border:1px solid #000;"></div>
+        </dd>
+
+        <dt class="col-sm-2">Text Color</dt>
+        <dd class="col-sm-10">
+            <div style="width:50px; height:25px; background-color:@Model.Txtcolor; border:1px solid #000;"></div>
+        </dd>
+    </dl>
+</div>
+
+<div class="mb-3">
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary" })
+    @Html.ActionLink("Back to Table", "Index", "TimeTable", null, new { @class = "btn btn-secondary ml-2" })
+</div>

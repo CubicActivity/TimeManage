@@ -1,0 +1,69 @@
+﻿@if (ViewBag.Conflicts != null)
+{
+    <div class="alert alert-danger">
+        <strong>Activity already exists in that day/time slot:</strong>
+        <ul>
+            @foreach (var c in (IEnumerable<object>)ViewBag.Conflicts)
+            {
+                var dict = (IDictionary<string, object>)c;
+                <li>@dict["DayName"] — @dict["Subject"] (@dict["StartHour"]:00 - @dict["EndHour"]:00)</li>
+            }
+        </ul>
+    </div>
+}
+
+@model TimeManage.Models.TimeSlot
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.TimeTableId)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Day)
+        @Html.EnumDropDownListFor(m => m.Day, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Start Hour")
+        <select name="StartHour" class="form-control">
+            @for (int h = 8; h < 22; h++)
+            {
+                <option value="@h" @(Model.StartTime.Hours == h ? "selected" : "")>@h:00</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        @Html.Label("End Hour")
+        <select name="EndHour" class="form-control">
+            @for (int h = Model.StartTime.Hours + 1; h <= 22; h++)
+            {
+                <option value="@h" @(Model.EndTime.Hours == h ? "selected" : "")>@h:00</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Subject)
+        @Html.EditorFor(m => m.Subject, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Location)
+        @Html.EditorFor(m => m.Location, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Color, "Slot Background Color")
+        <input type="color" name="Color" value="@Model.Color" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Txtcolor, "Text Color")
+        <input type="color" name="Txtcolor" value="@Model.Txtcolor" class="form-control" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Save</button>
+}

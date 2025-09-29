@@ -1,0 +1,212 @@
+﻿@model TimeManage.Models.TimeTable
+
+@{
+    ViewBag.Title = "My Time Table";
+    var renderedSlots = new HashSet<int>();
+}
+
+@if (TempData["Conflicts"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Cannot add activity because activity already exists in that day/time slot:</strong>
+        <ul>
+            @foreach (var dict in (List<Dictionary<string, object>>)TempData["Conflicts"])
+            {
+                <li>@dict["DayName"] — @dict["Subject"] (@dict["StartHour"]:00 - @dict["EndHour"]:00)</li>
+            }
+        </ul>
+    </div>
+}
+<style>
+    .timetable-container {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    .timetable-table-wrapper {
+        flex: 3 1 0;
+        min-width: 0;
+    }
+    table.table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+    table.table th:first-child,
+    table.table td:first-child {
+        width: 120px;
+    }
+
+    table.table th:not(:first-child),
+    table.table td:not(:first-child) {
+        width: calc((100% - 120px)/7);
+    }
+    .timetable-form-wrapper {
+        flex: 1 1 0;
+        min-width: 250px;
+    }
+    @@media (max-width: 1200px) {
+        .timetable-container {
+            flex-direction: column;
+        }
+
+        .timetable-form-wrapper {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container">
+    <h2>@ViewBag.Title</h2>
+    <p>Manage you weekly schedule with the time table below</p>
+
+    <div class="row">
+        <div class="col-md-8">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+                        {
+                            <th>@day</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int hour = 8; hour < 22; hour++)
+                    {
+                        <tr>
+                            <td>@hour:00 - @(hour + 1):00</td>
+                            @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+                            {
+                                var slot = Model.TimeSlots.FirstOrDefault(s => s.Day == day && s.StartTime.Hours == hour && !renderedSlots.Contains(s.Id));
+
+                                if (slot != null)
+                                {
+                                    int rowspan = (int)(slot.EndTime - slot.StartTime).TotalHours;
+                                    renderedSlots.Add(slot.Id);
+
+                                    <td rowspan="@rowspan" style="background-color:@slot.Color; color:@slot.Txtcolor;" class="align-middle p-2">
+                                        <div class="d-flex flex-column justify-content-between h-100">
+                                            <div>
+                                                <strong style="font-size: 1.1em;">@slot.Subject</strong><br />
+                                                <small class="text-black-50">At: @slot.Location</small>
+                                            </div>
+
+                                            @Html.ActionLink("Edit", "Edit", "TimeSlots", new { id = slot.Id }, new { @class = "btn btn-primary" })
+                                        </div>
+                                    </td>
+                                }
+                                else if (!Model.TimeSlots.Any(s =>
+                                    s.Day == day &&
+                                    s.StartTime.Hours < hour &&
+                                    s.EndTime.Hours > hour &&
+                                    renderedSlots.Contains(s.Id)))
+                                {
+                                    <td></td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h3>Add a new Activity to the table</h3></div>
+                <div class="panel-body">
+                    @using (Html.BeginForm("AddTimeSlot", "TimeTable"))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("timeTableId", Model.Id)
+
+                        <div class="form-group">
+                            <label>Day of Week</label>
+                            @Html.DropDownList("Day", Enum.GetNames(typeof(DayOfWeek)).Select(d => new SelectListItem { Text = d }), new { @class = "form-control" })
+                        </div>
+
+                        <div class="form-group">
+                            <label>Start Hour</label>
+                            <select id="startHour" name="StartTime" class="form-control" required>
+                                <option value="">-- Select start hour --</option>
+                                @for (int hour = 8; hour < 22; hour++)
+                                {
+                                    <option value="@hour:00">@hour:00</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>End Hour</label>
+                            <select id="endHour" name="EndTime" class="form-control" required>
+                                <option value="">-- First select start hour --</option>
+                            </select>
+                        </div>
+
+                        <div id="timeError" style="color: red; display: none; margin-bottom: 10px;">
+                            End Time must be later than Start Time.
+                        </div>
+
+                        <script>
+                            const startHourSelect = document.getElementById("startHour");
+                            const endHourSelect = document.getElementById("endHour");
+
+                            startHourSelect.addEventListener("change", function () {
+                                const selectedStart = parseInt(this.value.split(":")[0]);
+                                endHourSelect.innerHTML = '<option value="">-- Select end hour --</option>';
+                                for (let h = selectedStart + 1; h < 23; h++) {
+                                    const hourText = `${h}:00`;
+                                    const opt = document.createElement("option");
+                                    opt.value = hourText;
+                                    opt.textContent = hourText;
+                                    endHourSelect.appendChild(opt);
+                                }
+                            });
+
+                            document.querySelector("form").addEventListener("submit", function (e) {
+                                const startVal = startHourSelect.value;
+                                const endVal = endHourSelect.value;
+
+                                function timeToMinutes(t) {
+                                    const [h, m] = t.split(":").map(Number);
+                                    return h * 60 + m;
+                                }
+
+                                if (!startVal || !endVal || timeToMinutes(endVal) <= timeToMinutes(startVal)) {
+                                    e.preventDefault();
+                                    document.getElementById("timeError").style.display = "block";
+                                } else {
+                                    document.getElementById("timeError").style.display = "none";
+                                }
+                            });
+                        </script>
+
+                        <div class="form-group">
+                            <label>Activity name</label>
+                            <input type="text" name="Subject" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="Location" class="form-control" required />
+                        </div>
+
+                        <div>
+                            <label>Pick slot background color</label>
+                            <input type="color" name="color" class="form-control" required>
+                        </div>
+
+                        <div>
+                            <label>Pick text color</label>
+                            <input type="color" name="txtcolor" class="form-control" required>
+                        </div>
+
+                        <br />
+                        <button type="submit" class="btn btn-primary">Add Slot</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

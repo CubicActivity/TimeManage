@@ -1,0 +1,72 @@
+﻿@using Microsoft.AspNet.Identity
+@using TimeManage.Models
+@{
+    string displayName = "";
+    if (Request.IsAuthenticated)
+    {
+        var userId = User.Identity.GetUserId();
+        using (var db = new ApplicationDbContext())
+        {
+            var user = db.Users.FirstOrDefault(u => u.Id == userId);
+            displayName = user?.DisplayName ?? User.Identity.GetUserName();
+        }
+    }
+
+    bool isTimerRunning = false;
+    string timerDisplay = "25:00";
+    try
+    {
+        var timerController = new TimeManage.Controllers.PomodoroTimersController();
+        var timerStatus = timerController.GetTimerStatus() as JsonResult;
+        if (timerStatus != null)
+        {
+            var timerData = timerStatus.Data;
+            var propInfo = timerData.GetType().GetProperty("IsRunning");
+            var displayInfo = timerData.GetType().GetProperty("DisplayTime");
+            if (propInfo != null && displayInfo != null)
+            {
+                isTimerRunning = (bool)propInfo.GetValue(timerData);
+                timerDisplay = (string)displayInfo.GetValue(timerData);
+            }
+        }
+    }
+    catch
+    {
+        isTimerRunning = false;
+        timerDisplay = "25:00";
+    }
+}
+
+@if (Request.IsAuthenticated)
+{
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <ul class="navbar-nav ms-auto d-flex align-items-center gap-3">
+            <li class="nav-item">
+                @Html.ActionLink("Hi " + displayName + "!", "Index", "Manage", null, new { @class = "nav-link text-white" })
+            </li>
+
+            <li class="nav-item">
+                <div id="pomodoro-timer" onclick="togglePomodoro()" title="Click to toggle the timer!"
+                     class="btn @(isTimerRunning ? "btn-warning text-black" : "btn-success text-white")"
+                     style="cursor:pointer; user-select:none;">
+                    ⏰ Pomodoro Time remaining: <span id="layout-pomodoro-timer">@timerDisplay</span>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-danger fw-bold" href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+            </li>
+        </ul>
+    }
+}
+else
+{
+    <ul class="navbar-nav navbar-right">
+        <li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "nav-link" })</li>
+        <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })</li>
+ 
+    </ul>
+}

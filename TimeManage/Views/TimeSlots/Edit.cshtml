@@ -1,0 +1,121 @@
+﻿@model TimeManage.Models.TimeSlot
+
+@{
+    ViewBag.Title = "Edit Time Slot";
+}
+
+<h2>Edit Activity</h2>
+
+@if (ViewBag.Conflicts != null)
+{
+    <div class="alert alert-danger">
+        <strong>Activity already exists in that day/time slot:</strong>
+        <ul>
+            @foreach (var c in (IEnumerable<object>)ViewBag.Conflicts)
+            {
+                var dict = (IDictionary<string, object>)c;
+                <li>@dict["DayName"] — @dict["Subject"] (@dict["StartHour"]:00 - @dict["EndHour"]:00)</li>
+            }
+        </ul>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.TimeTableId)
+    @Html.HiddenFor(m => m.StartTime)
+    @Html.HiddenFor(m => m.EndTime)
+    <div class="form-group">
+        @Html.LabelFor(m => m.Subject)
+        @Html.EditorFor(m => m.Subject, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Day, "Day of Week")
+        @Html.EnumDropDownListFor(m => m.Day, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Start Hour")
+        <select id="StartHour" class="form-control">
+            @for (int h = 8; h <= 21; h++)
+            {
+                <option value="@h" @(Model.StartTime.Hours == h ? "selected" : "")>@h:00</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        @Html.Label("End Hour")
+        <select id="EndHour" class="form-control">
+            @for (int h = Model.StartTime.Hours + 1; h <= 22; h++)
+            {
+                <option value="@h" @(Model.EndTime.Hours == h ? "selected" : "")>@h:00</option>
+            }
+        </select>
+    </div>
+
+
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Location)
+        @Html.EditorFor(m => m.Location, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Color, "Slot Background Color")
+        <input type="color" name="Color" value="@Model.Color" class="form-control form-control-color" />
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Txtcolor, "Text Color")
+        <input type="color" name="Txtcolor" value="@Model.Txtcolor" class="form-control form-control-color" />
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-primary me-2">Save</button>
+    @Html.ActionLink("Details", "Details", new { id = Model.Id }, new { @class = "btn btn-primary me-2" })
+    @Html.ActionLink("Delete", "Delete", new { id = Model.Id }, new { @class = "btn btn-danger" })
+    <br />
+    <br />
+    @Html.ActionLink("Back to Table", "Index", "TimeTable", null, new { @class = "btn btn-secondary" })
+}
+
+@section scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            var startSelect = document.getElementById("StartHour");
+            var endSelect = document.getElementById("EndHour");
+            var startHidden = document.querySelector('input[name="StartTime"]');
+            var endHidden = document.querySelector('input[name="EndTime"]');
+
+            function updateHiddenTimes() {
+                startHidden.value = startSelect.value + ":00:00";
+                endHidden.value = endSelect.value + ":00:00";
+            }
+
+            function updateEndOptions() {
+                var start = parseInt(startSelect.value);
+                var currentEnd = parseInt(endSelect.value) || (start + 1);
+
+                endSelect.innerHTML = "";
+
+                for (var h = start + 1; h <= 22; h++) {
+                    var option = document.createElement("option");
+                    option.value = h;
+                    option.text = h + ":00";
+                    if (h === currentEnd) option.selected = true;
+                    endSelect.appendChild(option);
+                }
+                updateHiddenTimes();
+            }
+
+            startSelect.addEventListener("change", updateEndOptions);
+            endSelect.addEventListener("change", updateHiddenTimes);
+
+            updateEndOptions();
+        });
+    </script>
+}

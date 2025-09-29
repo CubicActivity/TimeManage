@@ -1,0 +1,49 @@
+﻿@model TimeManage.Models.Goal
+
+@{
+    ViewBag.Title = "Goal details";
+}
+
+<h2>Details for  @Html.DisplayFor(model => model.GoalName)</h2>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            Goal Description
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GoalDescription)
+        </dd>
+
+    </dl>
+</div>
+<hr />
+
+<h4><b>Tasks Table</b></h4>
+<h5>Edit a task by clicking on its name</h5>
+<table class="table table-striped table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Task Name</th>
+            <th>Task Description</th>
+            <th>Completed</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (TimeManage.Models.Tasks t in Model.Tasks)
+        {
+            <tr>
+                <td>@Html.ActionLink(@t.Title, "Edit","Tasks", new { id = t.Id }, new { @class = "" })</td>
+                <td>@t.Description</td>
+                <td class="@(t.IsComplete ? "completed" : "not-completed")">
+                    @(t.IsComplete ? "✔️" : "❌")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.ActionLink("Add Tasks to goal table", "AddTasks", "Goals", new { id = Model.GoalId }, new { @Class = "btn btn-primary" })
+@Html.ActionLink("Edit goal", "Edit", new { id = Model.GoalId }, new { @class = "btn btn-secondary" })
+@Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-danger" })
